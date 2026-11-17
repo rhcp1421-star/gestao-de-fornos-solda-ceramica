@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#173b32">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Gestão de Fornos – Solda Cerâmica</title>
+<style>
+:root{--green:#173b32;--green2:#245747;--bg:#f3f6f4;--card:#fff;--line:#d8e2dc;--text:#17251e;--muted:#5c6c63;--accent:#e7f2eb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+header{background:linear-gradient(135deg,var(--green),var(--green2));color:white;padding:20px 16px 18px}
+header h1{font-size:22px;margin:0 0 6px}header p{margin:0;font-size:13px;opacity:.9}
+main{max-width:1100px;margin:auto;padding:14px}
+.topbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.field,.panel,.oven-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px}
+label{display:block;font-size:13px;font-weight:700;margin:0 0 6px}
+input[type=text],input[type=date],input[type=number],select,textarea{width:100%;border:1px solid #c9d6ce;border-radius:8px;padding:12px;font:inherit;background:#fff;color:var(--text);min-height:44px} .date-tools{display:flex;gap:7px;margin-top:8px}.date-tools button{flex:1;border:1px solid #c9d6ce;border-radius:8px;padding:9px 8px;background:#e1e9e4;color:var(--green);font-weight:700;min-height:40px}.date-preview{font-size:12px;color:var(--muted);margin:8px 0 0;min-height:15px}
+textarea{min-height:72px;resize:vertical}
+nav{display:flex;gap:7px;overflow-x:auto;padding:4px 0 12px;position:sticky;top:0;background:var(--bg);z-index:3}
+nav button,.btn{border:0;border-radius:9px;padding:11px 13px;font-weight:700;cursor:pointer;white-space:nowrap}
+nav button{background:#e1e9e4;color:var(--green)}nav button.active,.btn.primary{background:var(--green);color:white}
+.btn{background:#e1e9e4;color:var(--green)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.section{display:none}.section.active{display:block}
+h2{font-size:19px;margin:4px 0 12px}h3{font-size:15px;margin:0 0 10px}
+.hint{font-size:12px;color:var(--muted);margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.oven-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:8px}
+.oven-card{padding:10px}.oven-card strong{display:block;font-size:15px;margin-bottom:8px;color:var(--green)}
+.checkrow{display:flex;align-items:center;gap:7px;margin:7px 0;font-size:13px;font-weight:500}
+input[type=checkbox]{width:19px;height:19px;accent-color:var(--green);flex-shrink:0}
+.oven-card textarea{min-height:48px;font-size:12px;margin-top:7px}
+.manta-card{padding:8px;min-width:0}.manta-card strong{font-size:14px;margin-bottom:6px}.manta-row{display:grid;grid-template-columns:54px repeat(4,minmax(0,1fr));gap:3px;align-items:center;padding:4px 0;border-top:1px solid var(--line)}.manta-name{font-size:10px;font-weight:700;color:var(--muted)}.manta-pos{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:9px;line-height:1.05;min-width:0}.manta-pos input{width:16px;height:16px;margin:0}.manta-pos span{overflow-wrap:anywhere;text-align:center}.manta-card textarea{width:100%;min-height:38px;padding:6px;font-size:11px}.oven-grid:has(.manta-card){grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:7px}
+.inspection-card{min-width:0}.chamber-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}.chamber-check{display:flex;align-items:center;justify-content:center;gap:3px;border:1px solid var(--line);border-radius:7px;padding:5px 2px;margin:0;font-size:11px;font-weight:600}.chamber-check input{width:16px;height:16px;margin:0}.inspection-card .subhead{margin-top:12px}.block-row{margin:7px 0 10px}.block-row .checkrow{margin:0 0 5px}.block-row input[type=text]{padding:8px;font-size:12px}
+.subhead{margin:18px 0 9px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+.stat{display:inline-block;background:var(--accent);padding:8px 10px;border-radius:8px;font-size:13px;margin:0 6px 8px 0}
+a{color:#155b96;overflow-wrap:anywhere}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:22px}
+.notice{padding:10px 12px;background:#fff7df;border:1px solid #ead9a5;border-radius:9px;font-size:13px;margin:10px 0}
+.report-card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;margin:9px 0}.report-card.latest{border-left:5px solid var(--green)}.report-card .handover-title{font-size:15px;color:var(--green);font-weight:800;margin-bottom:7px}.report-card .report-status{display:inline-block;background:var(--accent);border-radius:6px;padding:4px 7px;font-size:11px;font-weight:700;margin-bottom:7px}.report-card h3{margin-bottom:6px}.report-meta{font-size:12px;color:var(--muted);margin-bottom:8px}.report-details{white-space:pre-wrap;font-size:13px;line-height:1.45}.report-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin:10px 0}
+@media(max-width:520px){.chamber-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.topbar{grid-template-columns:1fr}header h1{font-size:20px}main{padding:10px}.oven-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media print{nav,.actions,.no-print,footer{display:none!important}body{background:white}.section{display:block!important;page-break-inside:avoid}.oven-card,.panel,.field{break-inside:avoid}header{background:white;color:black;border-bottom:2px solid #333}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Gestão de Fornos – Solda Cerâmica</h1>
+  <p>Registro de atividades • Fornos 301 a 406 • Salvamento automático neste aparelho</p>
+  <button id="installAppBtn" type="button" style="display:none;margin-top:12px;border:1px solid rgba(255,255,255,.65);border-radius:9px;padding:10px 14px;background:#fff;color:#173b32;font-weight:700" onclick="installPWA()">Instalar aplicativo</button>
+</header>
+<main>
+  <div class="topbar">
+    <div class="field"><label for="data">Data da atividade</label><input id="data" type="date" data-save aria-describedby="dataPreview"><div class="date-tools no-print"><button type="button" onclick="setActivityDateToday()">Usar hoje</button><button type="button" onclick="clearActivityDate()">Limpar data</button></div><p id="dataPreview" class="date-preview" aria-live="polite">Selecione a data da atividade.</p></div>
+    <div class="field"><label for="turno">Turno</label><select id="turno" data-save><option value="">Selecione</option><option>Turno 1</option><option>Turno 2</option><option>Turno 3</option></select></div>
+    <div class="field"><label for="responsavel">Responsável pelo turno</label><input id="responsavel" type="text" data-save placeholder="Nome do responsável"></div>
+    <div class="field"><label for="usuarioAcesso">Usuário / login de acesso</label><input id="usuarioAcesso" type="text" data-save placeholder="Identificação usada no acesso"></div>
+    <div class="field"><label for="equipe">Equipe / observação geral</label><input id="equipe" type="text" data-save placeholder="Equipe, área ou observação"></div>
+  </div>
+  <div class="actions no-print">
+    <button class="btn primary" onclick="saveNow()">Salvar agora</button>
+    <button class="btn" onclick="exportJSON()">Exportar backup</button>
+    <button class="btn" onclick="window.print()">Imprimir / salvar PDF</button>
+    <button class="btn" onclick="clearAll()">Limpar formulário</button>
+  </div>
+  <div id="status" class="hint" role="status">Os dados são salvos automaticamente neste aparelho.</div>
+  <nav class="no-print" aria-label="Seções do aplicativo">
+    <button class="active" data-tab="relatorios">Relatórios salvos</button>
+    <button data-tab="solda">Solda cerâmica</button>
+    <button data-tab="mantasDesgastadas">Escaneamento e desbaste de mantas</button>
+    <button data-tab="dry">Dry sílica</button>
+    <button data-tab="inspecoes">Inspeções</button>
+    <button data-tab="fogo">Combate ao fogo</button>
+    <button data-tab="bloqueio">Mapa de bloqueio</button>
+    <button data-tab="plataforma">Plataforma elevatória</button>
+  </nav>
+
+  <section id="solda" class="section">
+    <h2>Atividades de solda cerâmica</h2>
+    <p class="hint">Marque X nas atividades realizadas. Registre também o material de solda utilizado, a quantidade consumida em kg e as observações por forno.</p>
+    <div class="panel">
+      <h3>Solda por manta — 1º ao 7º</h3>
+      <p class="hint">Em cada forno, marque X na posição realizada: Leste, Oeste, Interno ou Parede. Cada manta tem sua própria marcação.</p>
+      <div id="mantas" class="oven-grid"></div>
+    </div>
+  </section>
+
+  <section id="mantasDesgastadas" class="section">
+    <h2>Escaneamento e desbaste de mantas</h2>
+    <p class="hint">Por forno, marque X nas posições verificadas durante o escaneamento e/ou desbaste: 1º ao 7º, Leste, Oeste, Interno e Parede. Registre nas observações o serviço executado e a condição encontrada.</p>
+    <div id="mantasDesgastadasGrid" class="oven-grid"></div>
+  </section>
+
+  <section id="dry" class="section">
+    <h2>Dry sílica</h2>
+    <p class="hint">Em cada forno, marque X em Sim ou Não para indicar se houve aplicação de dry sílica.</p>
+    <div id="drygrid" class="oven-grid"></div>
+  </section>
+
+  <section id="inspecoes" class="section">
+    <h2>Inspeções de fornos</h2>
+    <p class="hint">Em cada forno (301 a 406), marque X nas condições identificadas (forno furado, soleira e teto) e nas câmaras inspecionadas (Câmara 1 a 30). Há campos separados para observações do forno e das câmaras.</p>
+    <div id="inspecoesGrid" class="oven-grid"></div>
+  </section>
+  <section id="fogo" class="section">
+    <h2>Combate ao fogo</h2>
+    <p class="hint">Marque X em cada forno atuado. No mesmo cartão, marque X se houve abertura de vapor ou licor e registre observações.</p>
+    <div class="panel" style="margin-bottom:14px">
+      <h3>Rendimento das equipes — combate ao fogo</h3>
+      <p class="hint">Cadastre cada equipe separadamente. Marque X na equipe que rendeu e na preservação correspondente (1, 3 ou 4). Use a observação para complementar o registro.</p>
+      <div id="fogoRendimentoEquipes"></div>
+      <div class="actions no-print"><button type="button" class="btn primary" onclick="addFogoRendimentoEquipe()">+ Adicionar equipe</button></div>
+    </div>
+    <div id="fogogrid" class="oven-grid"></div>
+  </section>
+
+
+  <section id="bloqueio" class="section">
+    <h2>Mapa de bloqueio — Padrão (OBPR221001)</h2>
+    <p class="hint">Fornos 301 a 406. Informe somente o número do cadeado em cada ponto de bloqueio. Marque X apenas na máquina utilizada: Guia 1, Guia 2, MD 1 ou MD 2.</p>
+    <div class="notice"><strong>Identificação:</strong> Padrão • Código OBPR221001</div>
+    <div id="bloqueiogrid" class="oven-grid"></div>
+  </section>
+
+  <section id="plataforma" class="section">
+    <h2>Plataforma elevatória</h2>
+    <div class="actions no-print" style="margin-bottom:12px">
+      <button type="button" class="btn primary" data-platform-tab="plataformaDados" onclick="showPlatformTab('plataformaDados')">Plataforma elevatória</button>
+      <button type="button" class="btn" data-platform-tab="efetivo" onclick="showPlatformTab('efetivo')">Efetivo</button>
+    </div>
+    <div id="plataformaDados" class="platform-panel">
+      <div class="grid">
+        <div class="panel">
+          <label for="plataformaNumero">Número da plataforma elevatória</label>
+          <input id="plataformaNumero" type="text" data-save placeholder="Informe o número/identificação">
+          <label for="plataformaObs" style="margin-top:12px">Observações</label>
+          <textarea id="plataformaObs" data-save placeholder="Condição, uso ou observações"></textarea>
+        </div>
+        <div class="panel" style="grid-column:1/-1">
+          <h3>Checklist — Plataforma elevatória tipo tesoura</h3>
+          <p class="hint">Inspeção visual antes da utilização. Marque X em uma opção para cada item e registre qualquer irregularidade.</p>
+          <div class="notice">Se algum item estiver não conforme, não utilize a plataforma. Sinalize a condição e comunique o responsável pela área. Este checklist não substitui o manual do fabricante, a inspeção formal nem a capacitação do operador.</div>
+          <div class="grid" id="plataformaChecklistGrid"></div>
+          <label for="plataformaChecklistObs" style="margin-top:12px">Observações / irregularidades encontradas</label>
+          <textarea id="plataformaChecklistObs" placeholder="Descreva o item não conforme, identificação e providência comunicada" data-platform-obs></textarea>
+        </div>
+      </div>
+    </div>
+    <div id="efetivo" class="platform-panel" style="display:none">
+      <div class="panel">
+        <h3>Controle de efetivo por equipe</h3>
+        <p class="hint">Adicione um registro para cada equipe. Você pode marcar as preservações e cadastrar os colaboradores de cada equipe separadamente, inclusive repetir o preenchimento em outros momentos.</p>
+        <div id="efetivoEquipes"></div>
+        <div class="actions no-print" style="margin-top:12px"><button type="button" class="btn primary" onclick="addEfetivoEquipe()">+ Adicionar outra equipe</button></div>
+        <p class="hint">Cada equipe fica salva separadamente e aparece no relatório arquivado, vinculada à data e ao turno.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="relatorios" class="section active">
+    <h2>Relatórios salvos</h2>
+    <p class="hint">Cada relatório finalizado fica identificado pelo usuário/login de acesso, responsável, data e turno. Consulte o relatório completo por usuário ou filtre um forno específico para facilitar a passagem de turno.</p>
+    <div class="panel">
+      <h3>Finalizar relatório do turno</h3>
+      <p class="hint">Preencha o responsável, a data e o turno antes de finalizar. O relatório será arquivado sem apagar os anteriores.</p>
+      <button class="btn primary" onclick="finalizeReport()">Finalizar e arquivar relatório</button>
+      <button class="btn" onclick="renderReports()">Atualizar lista</button>
+    </div>
+    <div class="panel" style="margin-top:10px"><h3>Passagem de turno — localizar relatório</h3><p class="hint">Use a data e o turno para encontrar rapidamente o registro que o turno anterior deixou.</p><div class="report-filters">
+      <div class="field"><label for="filterDate">Data do relatório</label><input id="filterDate" type="date" onchange="renderReports()"><div class="date-tools"><button type="button" onclick="setReportDateToday()">Hoje</button><button type="button" onclick="clearReportFilters()">Limpar filtros</button></div></div>
+      <div class="field"><label for="filterShift">Turno</label><select id="filterShift" onchange="renderReports()"><option value="">Todos os turnos</option><option>Turno 1</option><option>Turno 2</option><option>Turno 3</option></select></div>
+      <div class="field"><label for="filterUser">Filtrar por usuário, login ou responsável</label><input id="filterUser" type="text" placeholder="Digite usuário/login ou responsável" oninput="renderReports()"></div>
+      <div class="field"><label for="filterOven">Filtrar por forno</label><select id="filterOven" onchange="renderReports()"><option value="">Todos os fornos</option>${Array.from({length:106},(_,i)=>`<option value="${301+i}">Forno ${301+i}</option>`).join('')}</select></div>
+    </div></div>
+    <div id="reportsCount" class="hint" aria-live="polite"></div><div id="reportsList"></div>
+    <div id="reportViewer" class="panel" style="display:none;margin-top:12px"></div>
+    <p class="notice">Atenção: esta versão HTML salva relatórios neste aparelho/navegador. O campo usuário/login identifica o acesso informado, mas não autentica a pessoa. Para login real e relatórios compartilhados entre usuários/celulares no Power Apps, é necessário configurar autenticação Microsoft e uma fonte compartilhada, como SharePoint ou Dataverse.</p>
+  </section>
+
+</main>
+<footer>Gestão Operacional de Fornos • Formulário local para registro de atividades</footer>
+<script>
+const ovens=Array.from({length:106},(_,i)=>301+i);
+const KEY='gestao_operacional_forno_v1';
+const REPORTS_KEY='gestao_operacional_fornos_relatorios_v1';
+let reports=[];try{reports=JSON.parse(localStorage.getItem(REPORTS_KEY)||'[]')||[]}catch(e){reports=[]}
+let state={};
+try{state=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){state={}}
+const labels={
+ mantas:['1º manta — Leste','1º manta — Oeste','1º manta — Interno','1º manta — Parede','2º manta — Leste','2º manta — Oeste','2º manta — Interno','2º manta — Parede','3º manta — Leste','3º manta — Oeste','3º manta — Interno','3º manta — Parede','4º manta — Leste','4º manta — Oeste','4º manta — Interno','4º manta — Parede','5º manta — Leste','5º manta — Oeste','5º manta — Interno','5º manta — Parede','6º manta — Leste','6º manta — Oeste','6º manta — Interno','6º manta — Parede','7º manta — Leste','7º manta — Oeste','7º manta — Interno','7º manta — Parede'], mantasDesgastadas:['1º manta — Leste','1º manta — Oeste','1º manta — Interno','1º manta — Parede','2º manta — Leste','2º manta — Oeste','2º manta — Interno','2º manta — Parede','3º manta — Leste','3º manta — Oeste','3º manta — Interno','3º manta — Parede','4º manta — Leste','4º manta — Oeste','4º manta — Interno','4º manta — Parede','5º manta — Leste','5º manta — Oeste','5º manta — Interno','5º manta — Parede','6º manta — Leste','6º manta — Oeste','6º manta — Interno','6º manta — Parede','7º manta — Leste','7º manta — Oeste','7º manta — Interno','7º manta — Parede'],
+
+ inspecoes:['Forno furado','Soleira','Teto'],observacoes:[],limpeza:['Limpeza realizada'],regenerador:['Ar aberto','Gás aberto'],soleira:['Soleira realizada'],
+ basetubo:['Solda base tubo'],dry:['Sim — aplicação realizada','Não — aplicação não realizada'],
+ fogo:['Forno atuado','Superior','Inferior','Topo de jambe','Externo','Jambe quebrado','Vapor aberto','Licor aberto'],bloqueio:['Válvula hidráulica','Vapor inferior','Boca de carga','Tramela','Limite de fim de curso']
+};
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function getRec(section,oven){if(!state[section])state[section]={};if(!state[section][oven])state[section][oven]={checks:{},obs:''};return state[section][oven]}
+function cardHTML(section,oven,items,withObs=true){
+ const rec=getRec(section,oven);
+ const rows=items.map((it,i)=>section==='bloqueio'
+   ? `<div class="block-row"><span>${esc(it)}</span><input type="text" inputmode="numeric" aria-label="Número do cadeado de bloqueio: ${esc(it)}, forno ${oven}" data-lock-number data-lock-section="${section}" data-oven="${oven}" data-key="${i}" value="${esc((rec.lockNumbers||{})[i]||'')}" placeholder="Nº do cadeado"></div>`
+   : `<label class="checkrow"><input type="checkbox" data-check-section="${section}" data-oven="${oven}" data-key="${i}" ${rec.checks[i]?'checked':''}> ${esc(it)}</label>`).join('');
+ const machines = section==='bloqueio'
+   ? `<div class="subhead"><h3>Máquina utilizada</h3>${['Guia 1','Guia 2','MD 1','MD 2'].map((m,i)=>`<label class="checkrow"><input type="checkbox" data-machine-section="${section}" data-oven="${oven}" data-machine-key="${i}" ${rec.machines&&rec.machines[i]?'checked':''}> ${m}</label>`).join('')}</div>`
+   : '';
+ const bandeirola = section==='fogo'
+   ? `<div class="block-row"><label for="bandeirola_${oven}">Número do cadeado da bandeirola</label><input id="bandeirola_${oven}" type="text" inputmode="numeric" data-lock-number data-lock-section="fogo" data-oven="${oven}" data-key="bandeirola" value="${esc((rec.lockNumbers||{}).bandeirola||'')}" placeholder="Informe o número do cadeado"></div>`
+   : '';
+ return `<div class="oven-card" data-oven-card="${oven}"><strong>Forno ${oven}</strong>${rows}${bandeirola}${machines}${withObs?`<textarea data-obs-section="${section}" data-oven="${oven}" placeholder="Observações do forno">${esc(rec.obs||'')}</textarea>`:''}</div>`;
+}
+function renderGrid(id,section,items,withObs=true){
+ if(section==='inspecoes'){
+   document.getElementById(id).innerHTML=ovens.map(o=>{
+     const rec=getRec(section,o);rec.chambers=rec.chambers||{};
+     const rows=items.map((it,i)=>`<label class="checkrow"><input type="checkbox" data-check-section="${section}" data-oven="${o}" data-key="${i}" ${rec.checks[i]?'checked':''}> ${esc(it)}</label>`).join('');
+     const chambers=Array.from({length:30},(_,i)=>`<label class="chamber-check"><input type="checkbox" data-chamber-check data-oven="${o}" data-chamber="${i+1}" ${rec.chambers[i+1]?'checked':''}><span>${i+1}</span></label>`).join('');
+     return `<div class="oven-card inspection-card" data-oven-card="${o}"><strong>Forno ${o}</strong>${rows}<label for="inspectionOvenObs_${o}">Observações do forno</label><textarea id="inspectionOvenObs_${o}" data-obs-section="${section}" data-oven="${o}" placeholder="Registre as condições gerais encontradas no forno">${esc(rec.obs||'')}</textarea><div class="subhead"><h3>Inspeção de câmaras</h3><p class="hint">Marque X nas câmaras inspecionadas (1 a 30)</p><div class="chamber-grid">${chambers}</div></div><label for="inspectionChamberObs_${o}">Observações das câmaras</label><textarea id="inspectionChamberObs_${o}" data-chamber-obs data-oven="${o}" placeholder="Registre as condições encontradas nas câmaras">${esc(rec.chamberObs||'')}</textarea></div>`;
+   }).join('');
+   return;
+ }
+ if(section==='mantas'||section==='mantasDesgastadas'){
+   document.getElementById(id).innerHTML=ovens.map(o=>{
+     const rec=getRec(section,o);let html=`<div class="oven-card manta-card" data-oven-card="${o}"><strong>Forno ${o}</strong>`;
+     const positions=['Leste','Oeste','Interno','Parede'];
+     for(let m=0;m<7;m++){
+       html+=`<div class="manta-row"><span class="manta-name">${m+1}º manta</span>`;
+       positions.forEach((pos,j)=>{const k=m*4+j;html+=`<label class="manta-pos"><input type="checkbox" data-check-section="${section}" data-oven="${o}" data-key="${k}" ${rec.checks[k]?'checked':''}><span>${pos}</span></label>`});
+       html+='</div>';
+     }
+     if(section==='mantas'){
+       rec.materialTypes=rec.materialTypes||{};
+       html+=`<div class="subhead material-box"><h3>Material de solda utilizado</h3>
+         ${['Fosbel','Fibs','Lumart','Outro material'].map((name,i)=>`<label class="checkrow"><input type="checkbox" data-material-type data-oven="${o}" data-material-key="${i}" ${rec.materialTypes[i]?'checked':''}> ${name} (X)</label>`).join('')}
+         <label for="materialKg_${o}" style="margin-top:9px">Quantidade consumida (kg)</label>
+         <input id="materialKg_${o}" type="number" min="0" step="0.1" inputmode="decimal" data-material-field="kg" data-oven="${o}" value="${esc(rec.materialKg||'')}" placeholder="Ex.: 12,5">
+         <label for="materialObs_${o}" style="margin-top:9px">Observações do material</label>
+         <textarea id="materialObs_${o}" data-material-field="obs" data-oven="${o}" placeholder="Detalhe quantidade, aplicação ou uso">${esc(rec.materialObs||'')}</textarea>
+       </div>`;
+     }
+     html+=withObs?`<textarea data-obs-section="${section}" data-oven="${o}" placeholder="Observações do forno">${esc(rec.obs||'')}</textarea>`:'';
+     return html+'</div>';
+   }).join('');
+   return;
+ }
+ document.getElementById(id).innerHTML=ovens.map(o=>cardHTML(section,o,items,withObs)).join('')
+}
+renderGrid('mantas','mantas',labels.mantas);
+renderGrid('mantasDesgastadasGrid','mantasDesgastadas',labels.mantasDesgastadas);
+renderGrid('drygrid','dry',labels.dry,false);
+renderGrid('inspecoesGrid','inspecoes',labels.inspecoes,true);
+renderGrid('fogogrid','fogo',labels.fogo);
+state.fogoRendimento=state.fogoRendimento||{};renderFogoRendimentoEquipes();
+renderGrid('bloqueiogrid','bloqueio',labels.bloqueio,false);
+document.querySelectorAll('[data-save]').forEach(el=>{if(state.meta&&state.meta[el.id]!=null)el.value=state.meta[el.id]});
+const plataformaItens=[
+ ['estrutura','Estrutura, chassi e tesoura sem danos ou deformações aparentes'],
+ ['piso','Piso/plataforma sem danos, sujeira excessiva ou objetos soltos'],
+ ['guarda','Guarda-corpo, portão e rodapé íntegros e firmes'],
+ ['rodas','Rodas, pneus e estabilização sem danos aparentes'],
+ ['vazamentos','Mangueiras e conexões sem vazamentos aparentes'],
+ ['bateria','Bateria, cabos e conectores sem danos aparentes'],
+ ['comandos','Comandos e identificação dos controles em boas condições'],
+ ['emergencia','Botão de parada de emergência identificado e íntegro'],
+ ['descida','Dispositivo/sistema de descida de emergência identificado e íntegro'],
+ ['alarme','Alarme, buzina e sinalização em condições aparentes'],
+ ['sensores','Indicadores e sensores de segurança sem alertas ou danos aparentes'],
+ ['placa','Placa de capacidade e identificação legíveis'],
+ ['documentos','Inspeção/manutenção dentro da validade conforme controle da empresa'],
+ ['solo','Piso/solo da área de trabalho firme, nivelado e sem obstáculos aparentes'],
+ ['entorno','Área ao redor livre de pessoas, obstáculos e interferências visíveis']
+];
+state.plataformaChecklist=state.plataformaChecklist||{};
+document.getElementById('plataformaChecklistGrid').innerHTML=plataformaItens.map(([key,label])=>{const v=state.plataformaChecklist[key]||{};return `<div class="field"><strong style="font-size:13px">${label}</strong><div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px"><label class="checkrow"><input type="checkbox" data-platform-check="conforme" data-platform-item="${key}" ${v.conforme?'checked':''}> Conforme (X)</label><label class="checkrow"><input type="checkbox" data-platform-check="naoConforme" data-platform-item="${key}" ${v.naoConforme?'checked':''}> Não conforme (X)</label><label class="checkrow"><input type="checkbox" data-platform-check="na" data-platform-item="${key}" ${v.na?'checked':''}> N/A (X)</label></div></div>`}).join('');
+if(state.plataformaChecklistObs)document.getElementById('plataformaChecklistObs').value=state.plataformaChecklistObs;
+state.efetivoEquipes=Array.isArray(state.efetivoEquipes)?state.efetivoEquipes:[(state.efetivo||{})].filter(x=>x.nomes||x.preservacao1||x.preservacao3||x.preservacao4);if(!state.efetivoEquipes.length)state.efetivoEquipes=[{}];renderEfetivoEquipes();
+const dateInput=document.getElementById('data');
+if(!dateInput.value&&!(state.meta&&Object.prototype.hasOwnProperty.call(state.meta,'data'))){const now=new Date();dateInput.value=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');}
+updateDatePreview();
+function setReportDateToday(){const now=new Date();document.getElementById('filterDate').value=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');renderReports()}
+function clearReportFilters(){['filterDate','filterShift','filterUser','filterOven'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});renderReports()}
+function updateDatePreview(){const el=document.getElementById('dataPreview');if(!el)return;if(!dateInput.value){el.textContent='Nenhuma data selecionada.';return;}const parts=dateInput.value.split('-').map(Number);const chosen=new Date(parts[0],parts[1]-1,parts[2]);el.textContent='Data selecionada: '+chosen.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});}
+function setActivityDateToday(){const now=new Date();dateInput.value=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');updateDatePreview();saveNow();}
+function clearActivityDate(){dateInput.value='';updateDatePreview();saveNow();}
+function renderFogoRendimentoEquipes(){
+ const host=document.getElementById('fogoRendimentoEquipes');if(!host)return;
+ let equipes=state.fogoRendimento;
+ if(!Array.isArray(equipes)){
+   const old=equipes||{};
+   equipes=[{nome:'',rendeu:false,p1:!!old.p1,p3:!!old.p3,p4:!!old.p4,obs:''}];
+ }
+ if(!equipes.length)equipes=[{}];
+ state.fogoRendimento=equipes;
+ host.innerHTML=equipes.map((e,i)=>`<div class="panel" data-fogo-rendimento-equipe="${i}" style="margin:10px 0">
+   <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+    <h3>Equipe ${i+1}</h3>${equipes.length>1?`<button type="button" class="btn" onclick="removeFogoRendimentoEquipe(${i})">Remover equipe</button>`:''}
+   </div>
+   <label>Identificação da equipe</label><input type="text" data-rendimento-nome value="${esc(e.nome||'')}" placeholder="Nome ou número da equipe">
+   <label class="checkrow" style="margin-top:10px"><input type="checkbox" data-rendimento-equipe-rendeu ${e.rendeu?'checked':''}> Esta equipe rendeu (X)</label>
+   <div class="subhead"><strong>Qual preservação rendeu?</strong>
+    ${[1,3,4].map(n=>`<label class="checkrow"><input type="checkbox" data-rendimento-pres="${n}" ${e['p'+n]?'checked':''}> Preservação ${n} (X)</label>`).join('')}
+   </div>
+   <label>Observação da equipe</label><textarea data-rendimento-obs placeholder="Observações do rendimento">${esc(e.obs||'')}</textarea>
+  </div>`).join('');
+}
+function addFogoRendimentoEquipe(){saveNow();state.fogoRendimento=state.fogoRendimento||[];state.fogoRendimento.push({});renderFogoRendimentoEquipes();saveNow();}
+function removeFogoRendimentoEquipe(index){saveNow();state.fogoRendimento.splice(index,1);if(!state.fogoRendimento.length)state.fogoRendimento=[{}];renderFogoRendimentoEquipes();saveNow();}
+function renderEfetivoEquipes(){
+ const host=document.getElementById('efetivoEquipes');if(!host)return;const equipes=state.efetivoEquipes||[{}];
+ host.innerHTML=equipes.map((e,i)=>`<div class="panel" data-efetivo-equipe="${i}" style="margin:10px 0"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3>Equipe ${i+1}</h3>${equipes.length>1?`<button type="button" class="btn" onclick="removeEfetivoEquipe(${i})">Remover equipe</button>`:''}</div><div class="check-grid"><label class="checkrow"><input type="checkbox" data-pres="preservacao1" ${e.preservacao1?'checked':''}> Preservação 1 (X)</label><label class="checkrow"><input type="checkbox" data-pres="preservacao3" ${e.preservacao3?'checked':''}> Preservação 3 (X)</label><label class="checkrow"><input type="checkbox" data-pres="preservacao4" ${e.preservacao4?'checked':''}> Preservação 4 (X)</label></div><label style="margin-top:12px">Nomes dos colaboradores presentes nesta equipe</label><textarea data-efetivo-nomes rows="5" placeholder="Digite um nome por linha">${esc(e.nomes||'')}</textarea></div>`).join('');
+}
+function addEfetivoEquipe(){saveNow();state.efetivoEquipes=state.efetivoEquipes||[];state.efetivoEquipes.push({});renderEfetivoEquipes();saveNow();}
+function removeEfetivoEquipe(index){if(!confirm('Remover o registro desta equipe?'))return;saveNow();state.efetivoEquipes.splice(index,1);if(!state.efetivoEquipes.length)state.efetivoEquipes.push({});renderEfetivoEquipes();saveNow();}
+function saveNow(){
+ state.meta=state.meta||{};
+ document.querySelectorAll('[data-save]').forEach(el=>state.meta[el.id]=el.value);
+ document.querySelectorAll('[data-check-section]').forEach(el=>{const r=getRec(el.dataset.checkSection,el.dataset.oven);r.checks[el.dataset.key]=el.checked});
+ document.querySelectorAll('[data-chamber-check]').forEach(el=>{const r=getRec('inspecoes',el.dataset.oven);r.chambers=r.chambers||{};r.chambers[el.dataset.chamber]=el.checked});
+ document.querySelectorAll('[data-machine-section]').forEach(el=>{const r=getRec(el.dataset.machineSection,el.dataset.oven);r.machines=r.machines||{};r.machines[el.dataset.machineKey]=el.checked});
+ document.querySelectorAll('[data-obs-section]').forEach(el=>{getRec(el.dataset.obsSection,el.dataset.oven).obs=el.value});
+ document.querySelectorAll('[data-chamber-obs]').forEach(el=>{getRec('inspecoes',el.dataset.oven).chamberObs=el.value});
+  document.querySelectorAll('[data-lock-number]').forEach(el=>{const r=getRec(el.dataset.lockSection,el.dataset.oven);r.lockNumbers=r.lockNumbers||{};r.lockNumbers[el.dataset.key]=el.value});
+ document.querySelectorAll('[data-material-type]').forEach(el=>{const r=getRec('mantas',el.dataset.oven);r.materialTypes=r.materialTypes||{};r.materialTypes[el.dataset.materialKey]=el.checked});
+ document.querySelectorAll('[data-material-field]').forEach(el=>{const r=getRec('mantas',el.dataset.oven);if(el.dataset.materialField==='kg')r.materialKg=el.value;else r.materialObs=el.value});
+ state.plataformaChecklist=state.plataformaChecklist||{};
+ document.querySelectorAll('[data-platform-check]').forEach(el=>{const k=el.dataset.platformItem;state.plataformaChecklist[k]=state.plataformaChecklist[k]||{};state.plataformaChecklist[k][el.dataset.platformCheck]=el.checked});
+ const platformObs=document.querySelector('[data-platform-obs]');if(platformObs)state.plataformaChecklistObs=platformObs.value;
+ state.efetivoEquipes=Array.from(document.querySelectorAll('[data-efetivo-equipe]')).map(card=>({preservacao1:!!card.querySelector('[data-pres="preservacao1"]')?.checked,preservacao3:!!card.querySelector('[data-pres="preservacao3"]')?.checked,preservacao4:!!card.querySelector('[data-pres="preservacao4"]')?.checked,nomes:card.querySelector('[data-efetivo-nomes]')?.value||''}));
+ state.fogoRendimento=Array.from(document.querySelectorAll('[data-fogo-rendimento-equipe]')).map(card=>({nome:card.querySelector('[data-rendimento-nome]')?.value||'',obs:card.querySelector('[data-rendimento-obs]')?.value||'',rendeu:!!card.querySelector('[data-rendimento-equipe-rendeu]')?.checked,...Object.fromEntries([1,3,4].map(n=>['p'+n,!!card.querySelector('[data-rendimento-pres="'+n+'"]')?.checked]))}));
+ try{localStorage.setItem(KEY,JSON.stringify(state));document.getElementById('status').textContent='Salvo neste aparelho às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}catch(e){document.getElementById('status').textContent='Não foi possível salvar. Verifique o espaço disponível no navegador.'}
+ updateSummary();
+}
+function readUI(){saveNow()}
+document.addEventListener('change',e=>{if(e.target.matches('[data-check-section],[data-chamber-check],[data-machine-section],[data-save],[data-material-type],[data-platform-check],[data-pres],[data-rendimento-pres],[data-rendimento-equipe-rendeu]')){if(e.target.id==='data')updateDatePreview();saveNow();}});
+document.addEventListener('input',e=>{if(e.target.matches('[data-obs-section],[data-chamber-obs],[data-save],[data-lock-number],[data-material-field],[data-platform-obs],[data-efetivo-nomes],[data-rendimento-nome],[data-rendimento-obs]')){if(e.target.id==='data')updateDatePreview();clearTimeout(window._saveDelay);window._saveDelay=setTimeout(saveNow,250)}});
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{saveNow();document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===b.dataset.tab));if(b.dataset.tab==='resumo')updateSummary();window.scrollTo({top:0,behavior:'smooth'})}));
+function snapshotCurrent(){
+ saveNow();
+ return JSON.parse(JSON.stringify(state));
+}
+function finalizeReport(){
+ const meta=state.meta||{};
+ if(!String(meta.responsavel||'').trim()){alert('Informe o nome do responsável antes de finalizar o relatório.');document.getElementById('responsavel').focus();return}
+ if(!meta.data||!meta.turno){if(!confirm('A data ou o turno não foi informado. Deseja arquivar mesmo assim?'))return}
+ const snap=snapshotCurrent();
+ const report={id:'R'+Date.now(),savedAt:new Date().toISOString(),meta:snap.meta||{},data:snap};
+ reports.unshift(report);
+ try{localStorage.setItem(REPORTS_KEY,JSON.stringify(reports));document.getElementById('status').textContent='Relatório arquivado para '+(meta.responsavel||'responsável')+'.';renderReports();alert('Relatório arquivado separadamente. Os relatórios anteriores foram mantidos.');}
+ catch(e){reports.shift();alert('Não foi possível arquivar. Exporte um backup e libere espaço no aparelho.');}
+}
+function reportOvenHasData(report,oven){
+ const d=report.data||{};
+ return Object.keys(labels).some(k=>{const r=d[k]&&d[k][oven];return r&&(Object.values(r.checks||{}).some(Boolean)||Object.values(r.chambers||{}).some(Boolean)||String(r.obs||'').trim()||String(r.chamberObs||'').trim()||Object.values(r.lockNumbers||{}).some(v=>String(v||'').trim())||Object.values(r.machines||{}).some(Boolean)||Object.values(r.materialTypes||{}).some(Boolean)||String(r.materialKg||'').trim()||String(r.materialObs||'').trim())});
+}
+function reportText(report,ovenFilter=''){
+ const d=report.data||{},m=report.meta||{};let out=`RELATÓRIO OPERACIONAL DE FORNOS\nResponsável: ${m.responsavel||'—'}\nUsuário/login de acesso: ${m.usuarioAcesso||'—'}\nData: ${m.data||'—'}\nTurno: ${m.turno||'—'}\nEquipe/observação geral: ${m.equipe||'—'}\nArquivado em: ${new Date(report.savedAt).toLocaleString('pt-BR')}\n`;
+ const equipes=d.efetivoEquipes||((d.efetivo)?[d.efetivo]:[]);if(equipes.length){out+='\nEFETIVO DO DIA — POR EQUIPE\n';equipes.forEach((ef,i)=>{const pres=['preservacao1','preservacao3','preservacao4'].filter(k=>ef[k]).map(k=>({'preservacao1':'Preservação 1','preservacao3':'Preservação 3','preservacao4':'Preservação 4'}[k]));out+='Equipe '+(i+1)+'\nPreservação: '+(pres.length?pres.join(', '):'Não informado')+'\nColaboradores presentes: '+(String(ef.nomes||'').trim()||'Não informado')+'\n';});}
+ const rend=d.fogoRendimento||[];if(Array.isArray(rend)&&rend.length){out+='\nCOMBATE AO FOGO — RENDIMENTO DAS EQUIPES\n';rend.forEach((e,i)=>{const pres=[1,3,4].filter(n=>e['p'+n]).map(n=>'Preservação '+n);if(e.nome||e.rendeu||pres.length||e.obs)out+='Equipe '+(i+1)+': '+(e.nome||'Sem identificação')+(e.rendeu?' — RENDEU (X)':'')+'\nPreservação: '+(pres.length?pres.join(', '):'Não marcada')+'\nObservação: '+(e.obs||'—')+'\n';});}
+ const sections={inspecoes:'Inspeções de fornos',mantas:'Mantas soldadas',mantasDesgastadas:'Escaneamento e desbaste de mantas',limpeza:'Limpeza de câmara',soleira:'Soleira',basetubo:'Solda base tubo',dry:'Dry sílica',fogo:'Combate ao fogo',bloqueio:'Mapa de bloqueio'};
+ Object.entries(sections).forEach(([k,title])=>{
+  const ovensData=d[k]||{};let lines=[];
+  Object.entries(ovensData).forEach(([oven,r])=>{
+   if(ovenFilter&&oven!==ovenFilter)return;
+   const chosen=Object.entries(r.checks||{}).filter(([key,val])=>val).map(([key])=>labels[k]?.[key]||key).map(x=>(k==='mantas'||k==='mantasDesgastadas')?x.replace(' — ',' / '):x);
+   const details=[];if(chosen.length)details.push(chosen.join(', '));if(k==='inspecoes'){const chambers=Object.entries(r.chambers||{}).filter(([n,val])=>val).map(([n])=>'Câmara '+n);if(chambers.length)details.push('Câmaras inspecionadas: '+chambers.join(', '));}if(r.obs)details.push(k==='inspecoes'?'Observação do forno: '+r.obs:'Observação: '+r.obs);if(k==='inspecoes'&&r.chamberObs)details.push('Observação das câmaras: '+r.chamberObs);if(k==='mantas'){const mats=Object.entries(r.materialTypes||{}).filter(([key,val])=>val).map(([key])=>['Fosbel','Fibs','Lumart','Outro material'][Number(key)]||key);if(mats.length)details.push('Material de solda: '+mats.join(', '));if(String(r.materialKg||'').trim())details.push('Quantidade consumida: '+r.materialKg+' kg');if(String(r.materialObs||'').trim())details.push('Observação do material: '+r.materialObs);}
+   if(k==='bloqueio'){const locks=Object.entries(r.lockNumbers||{}).filter(([key,val])=>String(val||'').trim()).map(([key,val])=>(labels.bloqueio[key]||key)+': cadeado '+val);if(locks.length)details.push(locks.join('; '));const ms=Object.entries(r.machines||{}).filter(([key,val])=>val).map(([key])=>['Guia 1','Guia 2','MD 1','MD 2'][key]);if(ms.length)details.push('Máquinas: '+ms.join(', '));}
+   if(k==='fogo'&&String(r.lockNumbers?.bandeirola||'').trim())details.push('Cadeado da bandeirola: '+r.lockNumbers.bandeirola);
+   if(details.length)lines.push('Forno '+oven+': '+details.join(' | '));
+  });
+  if(lines.length)out+='\n'+title.toUpperCase()+'\n'+lines.join('\n')+'\n';
+ });
+ const pc=d.plataformaChecklist||{};const pcLines=[];Object.entries(pc).forEach(([key,v])=>{const item=plataformaItens.find(x=>x[0]===key);if(!item)return;const marks=[];if(v.conforme)marks.push('Conforme (X)');if(v.naoConforme)marks.push('Não conforme (X)');if(v.na)marks.push('N/A (X)');if(marks.length)pcLines.push(item[1]+': '+marks.join(', '));});if(pcLines.length||String(d.plataformaChecklistObs||'').trim()){out+='\nCHECKLIST — PLATAFORMA ELEVATÓRIA TIPO TESOURA\n'+(m.plataformaNumero?'Identificação: '+m.plataformaNumero+'\n':'')+pcLines.join('\n')+'\n';if(String(d.plataformaChecklistObs||'').trim())out+='Observações/irregularidades: '+d.plataformaChecklistObs+'\n';}
+ return out;
+}
+function showReport(id){
+ const r=reports.find(x=>x.id===id);if(!r)return;const viewer=document.getElementById('reportViewer');viewer.style.display='block';viewer.innerHTML=`<h3>Relatório — ${esc(r.meta?.responsavel||'Responsável não informado')}</h3><p class="report-meta">Usuário/login: ${esc(r.meta?.usuarioAcesso||'Não informado')} • ${esc(r.meta?.data||'Data não informada')} • ${esc(r.meta?.turno||'Turno não informado')}</p><label for="reportOvenView">Visualizar relatório geral ou de um forno</label><select id="reportOvenView" onchange="updateReportViewer('${id}')"><option value="">Relatório completo</option>${ovens.map(o=>`<option value="${o}">Somente forno ${o}</option>`).join('')}</select><div id="reportViewerText" class="report-details" style="margin-top:10px"></div><div class="actions no-print"><button class="btn primary" onclick="printReport('${id}')">Imprimir / salvar PDF</button><button class="btn" onclick="downloadReport('${id}')">Baixar TXT</button></div>`;updateReportViewer(id);viewer.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function updateReportViewer(id){const r=reports.find(x=>x.id===id);const el=document.getElementById('reportViewerText');if(r&&el)el.textContent=reportText(r,document.getElementById('reportOvenView')?.value||'')}
+function printReport(id){const r=reports.find(x=>x.id===id);if(!r)return;const text=reportText(r,document.getElementById('reportOvenView')?.value||'');const w=window.open('','_blank');if(!w){alert('Permita janelas pop-up para imprimir o relatório.');return}w.document.write('<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Relatório de Fornos</title><style>body{font:14px Arial;margin:24px;white-space:pre-wrap;line-height:1.5}h1{font-size:20px}</style><h1>Gestão de Fornos – Solda Cerâmica</h1><pre style="white-space:pre-wrap;font:14px Arial">'+esc(text)+'</pre></html>');w.document.close();w.focus();w.print()}
+function downloadReport(id){const r=reports.find(x=>x.id===id);if(!r)return;const text=reportText(r,document.getElementById('reportOvenView')?.value||'');const blob=new Blob([text],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='relatorio_fornos_'+(r.meta?.data||'data')+'_'+(r.meta?.responsavel||'usuario').replace(/[^a-z0-9_-]/gi,'_')+'.txt';a.click();URL.revokeObjectURL(url)}
+function deleteReport(id){if(!confirm('Excluir somente este relatório arquivado?'))return;reports=reports.filter(r=>r.id!==id);localStorage.setItem(REPORTS_KEY,JSON.stringify(reports));renderReports();document.getElementById('reportViewer').style.display='none'}
+function renderReports(){
+ const list=document.getElementById('reportsList');if(!list)return;
+ const user=(document.getElementById('filterUser')?.value||'').toLowerCase().trim(),oven=document.getElementById('filterOven')?.value||'',date=document.getElementById('filterDate')?.value||'',shift=document.getElementById('filterShift')?.value||'';
+ const filtered=reports.filter(r=>[r.meta?.responsavel,r.meta?.usuarioAcesso].some(v=>String(v||'').toLowerCase().includes(user))&&(!oven||reportOvenHasData(r,oven))&&(!date||r.meta?.data===date)&&(!shift||r.meta?.turno===shift)).sort((a,b)=>String(b.meta?.data||'').localeCompare(String(a.meta?.data||''))||String(b.savedAt||'').localeCompare(String(a.savedAt||'')));
+ const count=document.getElementById('reportsCount');if(count)count.textContent=`${filtered.length} relatório(s) encontrado(s) • mais recentes primeiro`;
+ list.innerHTML=filtered.length?filtered.map((r,i)=>`<div class="report-card ${i===0?'latest':''}"><div class="handover-title">${i===0?'Relatório mais recente • ':''}Passagem de turno</div><div class="report-status">${esc(r.meta?.turno||'Turno não informado')}</div><h3>${esc(r.meta?.responsavel||'Responsável não informado')}</h3><div class="report-meta">Data da atividade: <strong>${esc(formatDateBR(r.meta?.data)||'Não informada')}</strong><br>Usuário/login: ${esc(r.meta?.usuarioAcesso||'Não informado')}<br>Arquivado em: ${new Date(r.savedAt).toLocaleString('pt-BR')}</div><div class="actions no-print"><button class="btn primary" onclick="showReport('${r.id}')">Abrir relatório completo / por forno</button><button class="btn" onclick="downloadReport('${r.id}')">Baixar TXT</button><button class="btn" onclick="deleteReport('${r.id}')">Excluir</button></div></div>`).join(''):'<div class="panel">Nenhum relatório arquivado corresponde aos filtros. Confira a data e o turno ou limpe os filtros.</div>';
+}
+function formatDateBR(value){if(!value)return '';const p=String(value).split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:value;}
+function showPlatformTab(id){document.querySelectorAll('.platform-panel').forEach(el=>el.style.display=el.id===id?'block':'none');document.querySelectorAll('[data-platform-tab]').forEach(el=>el.classList.toggle('primary',el.dataset.platformTab===id));saveNow()}
+function updateSummary(){
+ if(!document.getElementById('summaryStats'))return;
+ const keys=Object.keys(labels);let total=0,active=new Set(),stats=[];
+ keys.forEach(k=>{let count=0;Object.entries(state[k]||{}).forEach(([o,r])=>{if(Object.values(r.checks||{}).some(Boolean)||Object.values(r.chambers||{}).some(Boolean)){count++;active.add(o)}});total+=count;stats.push(`<span class="stat"><b>${esc(({inspecoes:'Inspeções',mantas:'Mantas soldadas',mantasDesgastadas:'Escaneamento e desbaste de mantas',limpeza:'Limpeza',soleira:'Soleira',basetubo:'Base tubo',dry:'Dry sílica',fogo:'Combate ao fogo',bloqueio:'Mapa de bloqueio'})[k]||k)}:</b> ${count} forno(s)</span>`)});
+ document.getElementById('summaryStats').innerHTML=`<span class="stat"><b>${total}</b> registros de atividade com X</span><span class="stat"><b>${active.size}</b> fornos com alguma atividade marcada</span>`+stats.join('');
+ const m=state.meta||{};document.getElementById('summaryMeta').innerHTML=`Data: <b>${esc(m.data||'—')}</b> • Turno: <b>${esc(m.turno||'—')}</b> • Responsável: <b>${esc(m.responsavel||'—')}</b><br>Equipe/observação geral: ${esc(m.equipe||'—')}<br>Plataforma elevatória: ${esc(m.plataformaNumero||'—')}<br>Observação da plataforma: ${esc(m.plataformaObs||'—')}`;
+ document.getElementById('summaryOvens').innerHTML=active.size?[...active].sort((a,b)=>+a-+b).map(o=>`<span class="stat">Forno ${o}</span>`).join(''):'Nenhum forno marcado ainda.';
+}
+function exportJSON(){saveNow();const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='gestao_operacional_fornos_backup_'+(state.meta?.data||'registro')+'.json';a.click();URL.revokeObjectURL(url)}
+function clearAll(){if(!confirm('Tem certeza que deseja apagar todos os registros deste formulário neste aparelho? Exporte um backup antes, se precisar.'))return;localStorage.removeItem(KEY);state={};document.querySelectorAll('[data-save]').forEach(el=>el.value='');document.querySelectorAll('[data-check-section]').forEach(el=>el.checked=false);document.querySelectorAll('[data-obs-section]').forEach(el=>el.value='');document.querySelectorAll('[data-lock-number]').forEach(el=>el.value='');document.querySelectorAll('[data-material-type]').forEach(el=>el.checked=false);document.querySelectorAll('[data-material-field]').forEach(el=>el.value='');document.querySelectorAll('[data-platform-check]').forEach(el=>el.checked=false);document.querySelectorAll('[data-platform-obs]').forEach(el=>el.value='');document.querySelectorAll('[data-pres]').forEach(el=>el.checked=false);document.querySelectorAll('[data-efetivo-nomes]').forEach(el=>el.value='');state.efetivoEquipes=[{}];state.fogoRendimento=[{}];renderEfetivoEquipes();renderFogoRendimentoEquipes();document.getElementById('status').textContent='Formulário limpo.';updateSummary()}
+updateSummary();
+renderReports();
+</script>
+
+<script>
+// Recursos de instalação PWA; o restante do aplicativo permanece no HTML original.
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  const btn = document.getElementById('installAppBtn');
+  if (btn) btn.style.display = 'inline-block';
+});
+async function installPWA() {
+  if (!deferredInstallPrompt) {
+    alert('Para instalar, abra este aplicativo pelo endereço HTTPS no Chrome e use o menu ⋮ > Instalar aplicativo ou Adicionar à tela inicial.');
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  const btn = document.getElementById('installAppBtn');
+  if (btn) btn.style.display = 'none';
+}
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('PWA offline indisponível:', err)));
+}
+</script>
+
+</body>
+</html>
